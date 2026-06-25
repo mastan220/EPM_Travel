@@ -2,135 +2,119 @@
 
 A local, offline Flight Status lookup application for the SkyRoute platform.
 
-A support agent enters a flight number and date. The backend queries two deterministic stub providers, normalises their responses into a unified status model, merges them using freshness rules, and returns a single `FlightStatusResult`. The frontend displays the result with clear status colour coding and error states.
+A support agent enters a flight number and date. The backend queries two deterministic stub providers, normalises their responses into a unified status model, merges them using freshness rules, and returns a single `FlightStatusResult`. The frontend displays the result with clear status color coding and error states.
 
 ## Tech Stack
 
-- Backend: .NET 10 Minimal API, C#
-- Frontend: React with Vite and TypeScript
+- Backend: .NET 8 Minimal API, C#
+- Frontend: React + Vite + TypeScript
 - Tests: xUnit + coverlet collector
-- AI tooling: IDE-integrated coding assistant such as GitHub Copilot, Cursor, or Claude Code
-
-> Note: The challenge allows .NET 8+. This solution targets the latest LTS .NET version available at project start. If your interview environment only supports .NET 8, change `TargetFramework` from `net10.0` to `net8.0`.
-
-## Repository Structure
-
-```text
-flight-status/
-├── README.md
-├── spec.md
-├── prompts.md
-├── reflection.md
-├── .github/
-│   └── copilot-instructions.md
-├── docs/
-│   ├── implementation-plan.md
-│   ├── development-agent.md
-│   ├── unit-test-agent.md
-│   └── code-review-agent.md
-├── FlightStatus.Api/
-├── FlightStatus.Tests/
-└── flight-status-ui/
-```
 
 ## Prerequisites
 
 Install the following before running locally:
 
-- .NET SDK 10.x or .NET SDK 8.x
-- Node.js LTS
+- .NET SDK 8.x
+- Node.js LTS (18+ recommended)
 - Git
-- IDE-integrated AI tool enabled in VS Code or your preferred IDE
 
-## Setup Commands
+## Clone Repository
 
 ```bash
-git clone <your-public-github-repo-url>
-cd flight-status
+git clone https://github.com/mastan220/EPM_Travel.git
+cd EPM_Travel
 ```
 
-## Backend Setup
+## Restore Dependencies
 
 ```bash
-dotnet new sln -n FlightStatus
-
-dotnet new webapi -n FlightStatus.Api --framework net10.0
-dotnet new xunit -n FlightStatus.Tests --framework net10.0
-
-dotnet sln add FlightStatus.Api/FlightStatus.Api.csproj
-dotnet sln add FlightStatus.Tests/FlightStatus.Tests.csproj
-
-dotnet add FlightStatus.Tests/FlightStatus.Tests.csproj reference FlightStatus.Api/FlightStatus.Api.csproj
-
-dotnet add FlightStatus.Tests/FlightStatus.Tests.csproj package coverlet.collector
-dotnet add FlightStatus.Tests/FlightStatus.Tests.csproj package FluentAssertions
-```
-
-If you use .NET 8 instead:
-
-```bash
-# Replace net10.0 with net8.0 in both project files.
-```
-
-## Frontend Setup
-
-```bash
-npm create vite@latest flight-status-ui -- --template react-ts
+dotnet restore FlightStatus.sln
 cd flight-status-ui
 npm install
 cd ..
 ```
 
-## Run Backend
+## Run Backend API
 
 ```bash
 dotnet run --project FlightStatus.Api
 ```
 
-Expected endpoint:
+The API starts on:
 
-```http
-GET /flights/status?flightNumber=SR101&date=2026-06-25
-```
+- https://localhost:7070
+- http://localhost:5219
 
-## Run Frontend
+Swagger UI:
+
+- https://localhost:7070/swagger
+
+## Run Frontend UI
+
+Open a second terminal:
 
 ```bash
 cd flight-status-ui
 npm run dev
 ```
 
-## Run Tests with Coverage
+Vite runs on:
+
+- http://localhost:5173
+
+By default, the UI calls `https://localhost:7070`. To change backend URL, create `flight-status-ui/.env`:
+
+```env
+VITE_API_URL=https://localhost:7070
+```
+
+## Test the API Quickly
+
+Example request:
+
+```http
+GET https://localhost:7070/flights/status?flightNumber=SR101&date=2026-06-25
+```
+
+PowerShell example:
+
+```powershell
+Invoke-RestMethod "https://localhost:7070/flights/status?flightNumber=SR101&date=2026-06-25"
+```
+
+## Run Tests
+
+```bash
+dotnet test FlightStatus.Tests/FlightStatus.Tests.csproj
+```
+
+Run tests with coverage:
 
 ```bash
 dotnet test FlightStatus.Tests/FlightStatus.Tests.csproj --collect:"XPlat Code Coverage"
 ```
 
-Optional coverage report:
+Optional HTML coverage report:
 
 ```bash
 dotnet tool install -g dotnet-reportgenerator-globaltool
 reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coverage-report" -reporttypes:Html
 ```
 
-## Assumptions
+## Behavior Notes
 
 - Providers are deterministic stubs and do not call external APIs.
-- `flightNumber` is treated case-insensitively and trimmed.
-- `date` must be in `yyyy-MM-dd` format.
-- AeroTrack can return optional enrichment fields: terminal, gate, and delay reason.
-- QuickFlight returns minimal schedule/status fields only.
-- If both providers respond, the provider result with later `lastUpdatedUtc` wins.
-- If no provider returns usable data, the result status is `Unknown` with a clear message.
+- `flightNumber` is required and treated case-insensitively.
+- `date` is required in `yyyy-MM-dd` format.
+- Merge rule: when both providers return data, later `lastUpdatedUtc` wins.
+- If no provider has usable data, status is `Unknown`.
 
-## Demo Checklist
+## Common Issues
 
-- Search valid flight returning `OnTime`.
-- Search valid flight returning `Delayed`.
-- Search valid flight returning `Cancelled`.
-- Search valid flight returning `Diverted`.
-- Search unknown flight returning `Unknown`.
-- Call API without `flightNumber` and verify HTTP 400.
-- Call API without `date` and verify HTTP 400.
-- Show test coverage report targeting 90%+ coverage.
-- Explain AI prompts and decisions from `prompts.md`.
+- HTTPS certificate warning on first run:
+
+```bash
+dotnet dev-certs https --trust
+```
+
+- Port conflict: stop the process using 7070 or 5173, then rerun.
