@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "awm5nUPvGrivtTL9PR66NMS2bcqwzwKMT1bQC3TGTvE=",
+  "Source": "FlightStatus.Api",
+  "BasePath": "_content/FlightStatus.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
