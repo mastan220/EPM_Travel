@@ -290,7 +290,14 @@ var assemblies = [
   {
     "name": "FlightStatus.Api",
     "classes": [
-      { "name": "Program", "rp": "FlightStatus.Api_Program.html", "cl": 0, "ucl": 29, "cal": 29, "tl": 44, "cb": 0, "tb": 4, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "FlightStatus.Api.Models.FlightStatusResult", "rp": "FlightStatus.Api_FlightStatusResult.html", "cl": 13, "ucl": 2, "cal": 15, "tl": 17, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "FlightStatus.Api.Models.ProviderFlightStatus", "rp": "FlightStatus.Api_ProviderFlightStatus.html", "cl": 14, "ucl": 2, "cal": 16, "tl": 18, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "FlightStatus.Api.Providers.AeroTrackFlightStatusProvider", "rp": "FlightStatus.Api_AeroTrackFlightStatusProvider.html", "cl": 44, "ucl": 0, "cal": 44, "tl": 58, "cb": 8, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "FlightStatus.Api.Providers.QuickFlightStatusProvider", "rp": "FlightStatus.Api_QuickFlightStatusProvider.html", "cl": 44, "ucl": 0, "cal": 44, "tl": 58, "cb": 8, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "FlightStatus.Api.Services.FlightStatusMerger", "rp": "FlightStatus.Api_FlightStatusMerger.html", "cl": 46, "ucl": 0, "cal": 46, "tl": 80, "cb": 12, "tb": 14, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "FlightStatus.Api.Services.FlightStatusNormalizer", "rp": "FlightStatus.Api_FlightStatusNormalizer.html", "cl": 24, "ucl": 0, "cal": 24, "tl": 47, "cb": 18, "tb": 18, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "FlightStatus.Api.Services.FlightStatusService", "rp": "FlightStatus.Api_FlightStatusService.html", "cl": 26, "ucl": 0, "cal": 26, "tl": 54, "cb": 8, "tb": 8, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
+      { "name": "Program", "rp": "FlightStatus.Api_Program.html", "cl": 0, "ucl": 70, "cal": 70, "tl": 83, "cb": 0, "tb": 6, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
       { "name": "WeatherForecast", "rp": "FlightStatus.Api_WeatherForecast.html", "cl": 0, "ucl": 2, "cal": 2, "tl": 44, "cb": 0, "tb": 0, "cm": 0, "fcm": 0, "tm": 0, "lch": [], "bch": [], "mch": [], "mfch": [], "hc": [], "metrics": { } },
     ]},
 ];
@@ -300,9 +307,17 @@ var metrics = [{ "name": "Crap Score", "abbreviation": "crp", "explanationUrl": 
 var historicCoverageExecutionTimes = [];
 
 var riskHotspotMetrics = [
+      { "name": "Crap Score", "explanationUrl": "https://googletesting.blogspot.de/2011/02/this-code-is-crap.html" },
+      { "name": "Cyclomatic complexity", "explanationUrl": "https://en.wikipedia.org/wiki/Cyclomatic_complexity" },
 ];
 
 var riskHotspots = [
+  {
+    "assembly": "FlightStatus.Api", "class": "FlightStatus.Api.Services.FlightStatusNormalizer", "reportPath": "FlightStatus.Api_FlightStatusNormalizer.html", "methodName": "NormalizeStatus(FlightStatus.Api.Models.ProviderFlightStatus)", "methodShortName": "NormalizeStatus(...)", "fileIndex": 0, "line": 12,
+    "metrics": [
+      { "value": 18, "exceeded": false },
+      { "value": 18, "exceeded": true },
+    ]},
 ];
 
 var branchCoverageAvailable = true;
