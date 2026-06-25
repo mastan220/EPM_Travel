@@ -1,13 +1,42 @@
+using FlightStatus.Api.Models;
+using FlightStatus.Api.Providers;
+using FlightStatus.Api.Services;
+using System.Text.Json.Serialization;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Add services to the container
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configure JSON serialization to convert enums to strings
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.WriteIndented = true;
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
+
+// Add CORS for frontend
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:3000")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
+// Register business services
+builder.Services.AddScoped<IFlightStatusProvider, AeroTrackFlightStatusProvider>();
+builder.Services.AddScoped<IFlightStatusProvider, QuickFlightStatusProvider>();
+builder.Services.AddScoped<FlightStatusNormalizer>();
+builder.Services.AddScoped<FlightStatusMerger>();
+builder.Services.AddScoped<FlightStatusService>();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -15,30 +44,40 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 
-var summaries = new[]
+// Flight Status Endpoint
+app.MapGet("/flights/status", async (
+    string? flightNumber,
+    string? date,
+    FlightStatusService flightStatusService,
+    CancellationToken cancellationToken) =>
 {
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+    // Validate flightNumber
+    if (string.IsNullOrWhiteSpace(flightNumber))
+    {
+        return Results.BadRequest(new { error = "flightNumber is required and cannot be blank" });
+    }
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
+    // Validate and parse date with strict format
+    if (string.IsNullOrWhiteSpace(date))
+    {
+        return Results.BadRequest(new { error = "date is required in yyyy-MM-dd format" });
+    }
+
+    // Validate exact format: yyyy-MM-dd
+    if (!DateOnly.TryParseExact(date, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var parsedDate))
+    {
+        return Results.BadRequest(new { error = "date must be in yyyy-MM-dd format" });
+    }
+
+    var result = await flightStatusService.GetStatusAsync(flightNumber, parsedDate, cancellationToken);
+    return Results.Ok(result);
 })
-.WithName("GetWeatherForecast")
+.WithName("GetFlightStatus")
 .WithOpenApi();
 
 app.Run();
 
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
+// Making Program public partial for test WebApplicationFactory
+public partial class Program { }
